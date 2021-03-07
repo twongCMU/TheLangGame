@@ -23,7 +23,7 @@ words that are deemed to be uncommon
 
 my_name = "Roose"
 
-cursor_ocr_characters = ["v","»","+","&","7","x","="]
+cursor_ocr_characters = ["v","»","+","&","7","x","=","-"]
 
 voice_names = ["fr-CA-Wavenet-A",
                "fr-CA-Wavenet-B",
@@ -146,6 +146,7 @@ def build_word_filter(filename, top_words):
                 row += 1
 
     top_words["retard"]=1
+    top_words["pigeon"]=1
 
 def pick_voice(username_text, voices_used, voice_names):
     # pick a voice
@@ -277,10 +278,10 @@ while 1:
     
     # if the last character is a v or » or + it probably OCR'd the cursor
     print("last char is " + text[-1])
-    print(text)
+
     if text[-1] in cursor_ocr_characters:
         text = text[:-1]
-
+    print(text)
     original_text = text
 
     text = text.lower()
@@ -294,6 +295,7 @@ while 1:
     words_to_translate = set()
     new_sentence_words = set()
     words_same_as_previous = 0
+
     for w in re.split('\s', text):
         word_list = process_word(w)
 
@@ -307,11 +309,10 @@ while 1:
 
         # Again, we operate on the original word for this detection
         new_sentence_words.add(w)
-
         for root_word in word_list:
             if len(root_word) < MIN_WORD_LENGTH:
                 continue
-
+            #print("operating on root " + root_word + " thresh " + str(top_words[root_word]))
             # discard anything that is lower than a certain score on the list of common words
             if root_word not in top_words or top_words[root_word] > WORD_FREQ_THRESHOLD:
                 #save the root of the word
@@ -372,13 +373,14 @@ while 1:
             # sometimes a word has multiple translations but they're all the same
             en_seen = set() 
 
-            print("["+en_word+"]")
             definitions_displayed = 0
             for index in range(min(len(en_reg), 5)):
                 definition = en_reg[index].strip()
                 if len(definition) > MAX_DEFINITION_LENGTH + 5:
                     definition = definition[:MAX_DEFINITION_LENGTH] + "[...]"
                 if definition not in en_seen:
+                    if definitions_displayed == 0:
+                        print("["+en_word+"]")
                     definitions_displayed+=1
                     printed+=1
                     print(" * " + definition)
