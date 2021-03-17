@@ -208,7 +208,7 @@ def get_tts(username_text, voices_used, original_text):
 top_words = {}
 
 # beginner files
-filter_files = ["french2.txt", "french3.txt"]
+filter_files = ["/home/tw/ocr/french2.txt", "/home/tw/ocr/french3.txt"]
 for filter_file in filter_files:
     build_word_filter(filter_file, top_words)
 
@@ -216,7 +216,7 @@ for filter_file in filter_files:
 for k in top_words.keys():
     top_words[k] = 1
 
-build_word_filter("french.txt", top_words)
+build_word_filter("/home/tw/ocr/french.txt", top_words)
 
     
 #print("top words size " + str(len(top_words.keys())))
@@ -246,6 +246,7 @@ while 1:
     sct_img = sct.grab(monitor)
     mss.tools.to_png(sct_img.rgb, sct_img.size, output=filename)
 
+    """
     # cut out the username area
     subprocess.Popen(["convert","-crop","300x50+60+450","-threshold","80%",filename,filename_username_edit]) #Hatoful username 768p
     # check if the username area is a high % white pixels so we don't accidentally OCR some background image
@@ -265,9 +266,11 @@ while 1:
             username_text = "Narrator"
     else:
         username_text = "Narrator"
-
+    """
+    username_text = ""
     #subprocess.Popen(["convert","-crop","1920x325+0+675","-threshold","60%", "-negate",filename,filename_edit]) #hatoful 1080p
-    subprocess.Popen(["convert","-crop","1280x220+40+510","-threshold","60%", "-negate",filename,filename_edit]) #Hatoful 768p
+    #subprocess.Popen(["convert","-crop","1280x220+40+510","-threshold","80%", "-negate",filename,filename_edit]) #Hatoful 768p
+    subprocess.Popen(["convert","-crop","1100x120+150+565","-threshold","25%", "-negate",filename,filename_edit]) #Coffee Talk 768p
     #subprocess.Popen(["convert","-crop","1090x600+280+250","-threshold","60%", "-negate",filename,filename_edit]) #ftl 1080p
     p = subprocess.Popen(["tesseract",filename_edit,"stdout","-l","fra"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
@@ -275,14 +278,15 @@ while 1:
     text = text.decode('utf-8')
     text = text.strip()
     text = re.sub(regex_quotes, "", text)
-    
-    # if the last character is a v or » or + it probably OCR'd the cursor
-    print("last char is " + text[-1])
 
-    if text[-1] in cursor_ocr_characters:
-        text = text[:-1]
-    print(text)
-    original_text = text
+    if len(text) > 2:
+        # if the last character is a v or » or + it probably OCR'd the cursor
+        print("last char is " + text[-1])
+
+        if text[-1] in cursor_ocr_characters:
+            text = text[:-1]
+        print(text)
+        original_text = text
 
     text = text.lower()
     #replace sentence punctuation with a space so we look up real words
@@ -321,6 +325,7 @@ while 1:
     word_count = max(len(new_sentence_words), len(old_sentence_words))
     #if (word_count > 0 and (float(words_same_as_previous))/(float(word_count)) > WORD_SAME_THRESHOLD) or len(words_to_translate) == 0:
     #    continue
+    """
     print(chr(27) + "[2J")
 
     if my_name != username_text:
@@ -337,7 +342,7 @@ while 1:
     if my_name != username_text:
         song = AudioSegment.from_mp3('output.mp3')
         play(song)
-    
+    """
     print(chr(27) + "[2J")
     print(username_text + ": " + text)
     old_sentence_words = new_sentence_words
