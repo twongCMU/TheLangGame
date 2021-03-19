@@ -22,6 +22,8 @@ words that are deemed to be uncommon
 #export GOOGLE_APPLICATION_CREDENTIALS=/home/tw/google_tts_creds.json 
 
 my_name = "Roose"
+output_file = open("words_outfile.txt","a")
+output_words_seen = set()
 
 cursor_ocr_characters = ["v","»","+","&","7","x","=","-"]
 
@@ -351,6 +353,12 @@ while 1:
     for w in sorted(words_to_translate):
         if w in words_to_translate_seen:
             continue
+
+        if w not in output_words_seen:
+            output_file.write(w+"\n")
+        
+        output_words_seen.add(w)
+
         en_command = ['sdcv', '--data-dir', '/home/tw/stardict/', '--use-dict', "Larousse Chambers français-anglais",  "-e", "-j", "-n",  w]
         p = subprocess.Popen(en_command, stdout=subprocess.PIPE)
         en_definition = p.communicate()[0]
