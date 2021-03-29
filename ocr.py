@@ -21,7 +21,7 @@ words that are deemed to be uncommon
 # Export this on in the terminal to import google credentials
 #export GOOGLE_APPLICATION_CREDENTIALS=/home/tw/google_tts_creds.json 
 
-my_name = "Roose"
+my_name = "Roosevelt"
 output_file = open("words_outfile.txt","a")
 output_words_seen = set()
 
@@ -43,16 +43,18 @@ voice_names_orig = []
 for v in voice_names:
     #(mixing pitch and speaking_rate)
     # My French isn't great so all of them have a slow speaking rate
-    for option in [",5,.9",",-5,.85",",0,.8"]: 
+    for option in [",3,.9",",-3,.85",",0,.85"]: 
         voice_names_orig.append(v+option)
 
 voice_names = voice_names_orig.copy()
 
 # make sure the narrator has a more reasonable voice
+"""
 narrator_voice += ",0,.8"
 voices_used = {}
 voices_used["Narrator"] = narrator_voice
 voice_names.remove(narrator_voice)
+"""
 
 # Instantiates a client
 tts_client = texttospeech.TextToSpeechClient()
@@ -151,6 +153,14 @@ def build_word_filter(filename, top_words):
     top_words["pigeon"]=1
 
 def pick_voice(username_text, voices_used, voice_names):
+    """ Pick a voice. 
+
+    In some cases we can extract the username from the text. In other cases we can't
+    """
+
+    # For the current game I'm playing, we want a random voice as we can't match them to a username
+    tts_name = random.choice(voice_names)
+
     # pick a voice
 
     unknown_user = None
@@ -272,7 +282,7 @@ while 1:
     username_text = ""
     #subprocess.Popen(["convert","-crop","1920x325+0+675","-threshold","60%", "-negate",filename,filename_edit]) #hatoful 1080p
     #subprocess.Popen(["convert","-crop","1280x220+40+510","-threshold","80%", "-negate",filename,filename_edit]) #Hatoful 768p
-    subprocess.Popen(["convert","-crop","1100x120+150+565","-threshold","25%", "-negate",filename,filename_edit]) #Coffee Talk 768p
+    subprocess.Popen(["convert","-crop","1300x220+50+465","-threshold","25%", "-negate",filename,filename_edit]) #Coffee Talk 768p
     #subprocess.Popen(["convert","-crop","1090x600+280+250","-threshold","60%", "-negate",filename,filename_edit]) #ftl 1080p
     p = subprocess.Popen(["tesseract",filename_edit,"stdout","-l","fra"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
@@ -327,9 +337,9 @@ while 1:
     word_count = max(len(new_sentence_words), len(old_sentence_words))
     #if (word_count > 0 and (float(words_same_as_previous))/(float(word_count)) > WORD_SAME_THRESHOLD) or len(words_to_translate) == 0:
     #    continue
-    """
+    
     print(chr(27) + "[2J")
-
+    voices_used = {}
     if my_name != username_text:
         pick_voice(username_text, voices_used, voice_names)
 
@@ -340,11 +350,11 @@ while 1:
             print("Repeating audio")
 
 
-    print("Username pct " + username_pct)
+    #print("Username pct " + username_pct)
     if my_name != username_text:
         song = AudioSegment.from_mp3('output.mp3')
         play(song)
-    """
+    
     print(chr(27) + "[2J")
     print(username_text + ": " + text)
     old_sentence_words = new_sentence_words
